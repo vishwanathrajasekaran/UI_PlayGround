@@ -8,7 +8,7 @@ export const catalog = [
     path: '/basic-elements',
     description: 'Textboxes, buttons, links, labels — the atoms of every locator strategy.',
   },
-  { code: 'FM', name: 'Forms', path: null, description: 'Login, registration, checkout, validation states.' },
+  { code: 'FM', name: 'Forms', path: '/forms', description: 'Login validation, dependent fields, reset behavior.' },
   { code: 'SC', name: 'Selection Controls', path: null, description: 'Checkboxes, radios, dropdowns, multi-select.' },
   { code: 'AC', name: 'Advanced Controls', path: null, description: 'Date/time pickers, sliders, file upload & download.' },
   { code: 'TB', name: 'Tables', path: null, description: 'Static, dynamic, sortable, filterable, paginated.' },
