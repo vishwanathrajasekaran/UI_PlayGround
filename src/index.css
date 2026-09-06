@@ -80,6 +80,12 @@ button {
   margin-bottom: 8px;
 }
 
+.sidebar-logo {
+  vertical-align: -6px;
+  margin-right: 8px;
+  border-radius: 4px;
+}
+
 .sidebar-title .mono-tag {
   display: block;
   margin-top: 4px;
@@ -150,7 +156,7 @@ button {
 
 .title-block-fields {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   font-family: var(--font-mono);
   font-size: 0.74rem;
 }
@@ -239,6 +245,10 @@ button {
   border-color: var(--color-hard-mode);
 }
 
+.specimen[data-done='true'] {
+  border-color: var(--color-pass);
+}
+
 .specimen-header {
   display: flex;
   align-items: baseline;
@@ -253,6 +263,12 @@ button {
   font-weight: 600;
 }
 
+.specimen-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .specimen-header .hard-badge {
   font-family: var(--font-mono);
   font-size: 0.65rem;
@@ -260,6 +276,27 @@ button {
   border: 1px solid var(--color-hard-mode);
   border-radius: var(--radius-sm);
   padding: 2px 6px;
+}
+
+.mark-done-btn {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  padding: 4px 9px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-grid);
+  background: var(--color-surface);
+  color: var(--color-ink-soft);
+  cursor: pointer;
+}
+
+.specimen[data-done='true'] .mark-done-btn {
+  border-color: var(--color-pass);
+  color: var(--color-pass);
+}
+
+.mark-done-btn:hover {
+  border-color: var(--color-accent);
+  color: var(--color-ink);
 }
 
 .specimen-body {
