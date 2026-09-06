@@ -13,6 +13,13 @@ import WindowsIframes from './pages/windows-iframes/WindowsIframes.jsx'
 import DynamicBehavior from './pages/dynamic-behavior/DynamicBehavior.jsx'
 import ApiNetwork from './pages/api-network/ApiNetwork.jsx'
 import Authentication from './pages/authentication/Authentication.jsx'
+import Ecommerce from './pages/ecommerce/Ecommerce.jsx'
+import Admin from './pages/admin/Admin.jsx'
+import LocatorLab from './pages/locator-lab/LocatorLab.jsx'
+import TestDataLab from './pages/test-data-lab/TestDataLab.jsx'
+import WaitStrategies from './pages/wait-strategies/WaitStrategies.jsx'
+import Challenges from './pages/challenges/Challenges.jsx'
+import SpecialChallenges from './pages/special-challenges/SpecialChallenges.jsx'
 
 export default function App() {
   return (
@@ -33,6 +40,13 @@ export default function App() {
           <Route path="/dynamic-behavior" element={<DynamicBehavior />} />
           <Route path="/api-network" element={<ApiNetwork />} />
           <Route path="/authentication" element={<Authentication />} />
+          <Route path="/ecommerce" element={<Ecommerce />} />
+          <Route path="/admin" element={<Admin />} />
+          <Route path="/locator-lab" element={<LocatorLab />} />
+          <Route path="/test-data-lab" element={<TestDataLab />} />
+          <Route path="/wait-strategies" element={<WaitStrategies />} />
+          <Route path="/challenges" element={<Challenges />} />
+          <Route path="/special-challenges" element={<SpecialChallenges />} />
         </Routes>
       </main>
     </div>
