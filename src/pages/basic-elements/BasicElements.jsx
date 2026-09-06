@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import Specimen from '../../components/Specimen.jsx'
+import { useProgress } from '../../hooks/useProgress.js'
 
 function useDynamicToken(intervalMs = 4000) {
   const [token, setToken] = useState(() => Math.random().toString(36).slice(2, 8))
@@ -10,10 +11,13 @@ function useDynamicToken(intervalMs = 4000) {
   return token
 }
 
+const SPECIMEN_IDS = ['textbox', 'textarea', 'buttons', 'links', 'label-icon', 'image', 'dynamic-id', 'no-attrs']
+
 export default function BasicElements() {
   const [textValue, setTextValue] = useState('')
   const [clickCount, setClickCount] = useState(0)
   const dynamicToken = useDynamicToken()
+  const { isDone, toggle, completedCount, total } = useProgress('basic-elements', SPECIMEN_IDS)
 
   return (
     <>
@@ -27,10 +31,19 @@ export default function BasicElements() {
             instead of ID-based ones.
           </p>
         </div>
+        <div className="title-block-fields">
+          <div>
+            <span className="field-label">Progress</span>
+            {completedCount} / {total} marked done
+          </div>
+        </div>
       </div>
 
       <Specimen
+        id="textbox"
         title="Textbox — stable"
+        done={isDone('textbox')}
+        onToggleDone={toggle}
         annotations={[
           ['id', 'username-input'],
           ['data-testid', 'basic-textbox'],
@@ -48,7 +61,10 @@ export default function BasicElements() {
       </Specimen>
 
       <Specimen
+        id="textarea"
         title="Textarea — stable"
+        done={isDone('textarea')}
+        onToggleDone={toggle}
         annotations={[
           ['id', 'bio-textarea'],
           ['data-testid', 'basic-textarea'],
@@ -58,7 +74,10 @@ export default function BasicElements() {
       </Specimen>
 
       <Specimen
+        id="buttons"
         title="Buttons — stable"
+        done={isDone('buttons')}
+        onToggleDone={toggle}
         annotations={[
           ['id', 'submit-btn / reset-btn'],
           ['data-testid', 'basic-submit / basic-reset'],
@@ -79,7 +98,10 @@ export default function BasicElements() {
       </Specimen>
 
       <Specimen
+        id="links"
         title="Links"
+        done={isDone('links')}
+        onToggleDone={toggle}
         annotations={[
           ['id', 'internal-link / external-link'],
           ['href', '/  ·  https://example.com'],
@@ -96,10 +118,13 @@ export default function BasicElements() {
       </Specimen>
 
       <Specimen
-        title="Labels, image & icon"
+        id="label-icon"
+        title="Label, checkbox & icon"
+        done={isDone('label-icon')}
+        onToggleDone={toggle}
         annotations={[
           ['label htmlFor', 'newsletter-checkbox'],
-          ['img alt', 'placeholder specimen graphic'],
+          ['svg aria-label', 'star icon'],
         ]}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
@@ -116,8 +141,32 @@ export default function BasicElements() {
       </Specimen>
 
       <Specimen
+        id="image"
+        title="Image"
+        done={isDone('image')}
+        onToggleDone={toggle}
+        annotations={[
+          ['id', 'specimen-image'],
+          ['alt', 'placeholder specimen graphic'],
+        ]}
+      >
+        <img
+          id="specimen-image"
+          data-testid="basic-image"
+          alt="placeholder specimen graphic"
+          width="120"
+          height="80"
+          style={{ borderRadius: 4, border: '1px solid var(--color-grid)' }}
+          src="https://placehold.co/120x80/eaeff4/1c2a38?text=EL-01"
+        />
+      </Specimen>
+
+      <Specimen
+        id="dynamic-id"
         title="Dynamic ID textbox"
         hard
+        done={isDone('dynamic-id')}
+        onToggleDone={toggle}
         annotations={[
           ['id', `field-${dynamicToken}`],
           ['note', 'id regenerates every 4s — use data-role instead'],
@@ -133,11 +182,12 @@ export default function BasicElements() {
       </Specimen>
 
       <Specimen
+        id="no-attrs"
         title="No stable attributes"
         hard
-        annotations={[
-          ['locator hint', 'match by visible text only'],
-        ]}
+        done={isDone('no-attrs')}
+        onToggleDone={toggle}
+        annotations={[['locator hint', 'match by visible text only']]}
       >
         <button className={`btn btn-outline rnd-${dynamicToken}`} onClick={() => alert('Found me by text!')}>
           Click the button that says exactly this
