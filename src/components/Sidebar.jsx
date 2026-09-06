@@ -5,6 +5,7 @@ export default function Sidebar() {
   return (
     <aside className="sidebar" data-testid="sidebar">
       <div className="sidebar-title">
+        <img src="/logo-mark.png" alt="" width="26" height="26" className="sidebar-logo" />
         UI Automation Playground
         <span className="mono-tag" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.68rem', color: 'var(--color-ink-soft)' }}>
           rev. 0.1 — sheet 1 of 19
