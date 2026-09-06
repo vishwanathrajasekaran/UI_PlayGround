@@ -372,3 +372,96 @@ button {
   margin-top: 10px;
   color: var(--color-pass);
 }
+
+/* ---- Tables ---- */
+table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 0.86rem;
+}
+
+th,
+td {
+  text-align: left;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--color-grid);
+}
+
+thead th {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--color-ink-soft);
+  font-weight: 500;
+  border-bottom: 1px solid var(--color-ink);
+}
+
+tbody tr:hover {
+  background: var(--color-bg);
+}
+
+/* ---- Tooltip ---- */
+.tooltip-wrapper {
+  display: inline-block;
+}
+
+.tooltip-bubble {
+  position: absolute;
+  bottom: 130%;
+  left: 0;
+  background: var(--color-ink);
+  color: #fff;
+  font-size: 0.76rem;
+  padding: 6px 10px;
+  border-radius: 4px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.12s ease;
+}
+
+.tooltip-wrapper:hover .tooltip-bubble {
+  opacity: 1;
+}
+
+/* ---- Hover reveal card ---- */
+.hover-card {
+  position: relative;
+  border: 1px solid var(--color-grid);
+  border-radius: 6px;
+  padding: 20px 16px;
+  max-width: 260px;
+  overflow: hidden;
+}
+
+.hover-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-ink);
+  color: #fff;
+  font-size: 0.82rem;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.hover-card:hover .hover-overlay {
+  opacity: 1;
+}
+
+/* ---- Drag and drop chips ---- */
+.drag-chip {
+  padding: 8px 14px;
+  border: 1px solid var(--color-grid);
+  border-radius: 6px;
+  background: var(--color-surface);
+  font-size: 0.85rem;
+  cursor: grab;
+}
+
+.drag-chip-dropped {
+  border-color: var(--color-pass);
+  color: var(--color-pass);
+  cursor: default;
+}
