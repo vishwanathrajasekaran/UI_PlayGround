@@ -10,9 +10,8 @@ waits, and synchronization.
 
 ## Status
 
-Phase 1 (frontend-only, no backend). Sheet **EL — Basic Elements** is built.
-Every other category in the sidebar/index is listed as "planned" so the full
-map of the app is visible from the start — see `src/catalog.js`.
+Phase 1 (frontend-only, no backend) is complete — all 19 sheets in the catalog are built. See
+`src/catalog.js` for the full index.
 
 ## Run locally
 
