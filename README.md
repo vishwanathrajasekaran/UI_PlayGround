@@ -1,5 +1,8 @@
 # UI Automation Playground
 
+![logo](public/logo-mark.png)
+
+
 A catalog of UI specimens for practicing Selenium / Playwright / Cypress —
 stable elements for basic locator practice, and deliberately unstable
 "hard mode" elements for practicing text- and structure-based locators,
