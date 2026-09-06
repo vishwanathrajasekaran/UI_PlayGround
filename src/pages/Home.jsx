@@ -8,7 +8,10 @@ export default function Home() {
     <>
       <div className="title-block" data-testid="title-block">
         <div className="title-block-main">
-          <h1>UI Automation Playground</h1>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 8 }}>
+            <img src="/logo-mark.png" alt="" width="44" height="44" style={{ borderRadius: 6 }} />
+            <h1 style={{ margin: 0 }}>UI Automation Playground</h1>
+          </div>
           <p>
             A catalog of interactive specimens for practicing Selenium, Playwright, and Cypress —
             from stable, well-labeled elements to deliberately unstable ones. Pick a sheet from the
