@@ -8,7 +8,7 @@ export default function Sidebar() {
         <img src="/logo-mark.png" alt="" width="26" height="26" className="sidebar-logo" />
         UI Automation Playground
         <span className="mono-tag" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.68rem', color: 'var(--color-ink-soft)' }}>
-          Creator: Vishwanath Rajasekaran
+          Vishwanath Rajasekaran
         </span>
       </div>
       <nav className="sidebar-nav">
