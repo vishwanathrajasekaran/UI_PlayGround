@@ -12,43 +12,58 @@ export default function ApiNetwork() {
   // --- Basic trigger ---
   const [triggerLoading, setTriggerLoading] = useState(false)
 
-  function fireTrigger() {
+  async function fireTrigger() {
     setTriggerLoading(true)
-    setTimeout(() => {
+    try {
+      const res = await fetch('/api/network/success')
+      const body = await res.json()
+      setLastResponse({ source: 'trigger', status: res.status, body })
+    } catch (err) {
+      setLastResponse({ source: 'trigger', status: 0, body: { error: err.message } })
+    } finally {
       setTriggerLoading(false)
-      setLastResponse({ source: 'trigger', status: 200, body: { message: 'ok', itemCount: 17 } })
-    }, 600)
+    }
   }
 
   // --- Network delay with elapsed-time counter ---
   const [delayLoading, setDelayLoading] = useState(false)
   const [elapsed, setElapsed] = useState(0)
 
-  function fireDelay() {
+  async function fireDelay() {
     setDelayLoading(true)
     setElapsed(0)
     const start = Date.now()
     const tick = setInterval(() => setElapsed(Math.round((Date.now() - start) / 100) / 10), 100)
-    setTimeout(() => {
+    try {
+      const res = await fetch('/api/network/delay')
+      const body = await res.json()
+      setLastResponse({ source: 'delay', status: res.status, body })
+    } catch (err) {
+      setLastResponse({ source: 'delay', status: 0, body: { error: err.message } })
+    } finally {
       clearInterval(tick)
       setDelayLoading(false)
-      setLastResponse({ source: 'delay', status: 200, body: { message: 'slow response completed', delayMs: 4000 } })
-    }, 4000)
-    return () => clearInterval(tick)
+    }
   }
 
   // --- Failure simulation ---
   const [failureLoading, setFailureLoading] = useState(false)
   const [failureError, setFailureError] = useState(false)
 
-  function fireFailure() {
+  async function fireFailure() {
     setFailureLoading(true)
     setFailureError(false)
-    setTimeout(() => {
-      setFailureLoading(false)
+    try {
+      const res = await fetch('/api/network/fail')
+      const body = await res.json()
+      setLastResponse({ source: 'failure', status: res.status, body })
+      setFailureError(!res.ok)
+    } catch (err) {
+      setLastResponse({ source: 'failure', status: 0, body: { error: err.message } })
       setFailureError(true)
-      setLastResponse({ source: 'failure', status: 500, body: { message: 'Internal Server Error' } })
-    }, 800)
+    } finally {
+      setFailureLoading(false)
+    }
   }
 
   return (
@@ -57,9 +72,10 @@ export default function ApiNetwork() {
         <div className="title-block-main">
           <h1>AN — API / Network</h1>
           <p>
-            Simulated API calls (no real backend yet — these use timers, not fetch) covering a
-            normal response, a slow response with a visible elapsed-time counter, a failure with
-            retry, and a shared viewer for whatever the most recent response was.
+            Real serverless endpoints (genuine <code>fetch</code> calls to Vercel functions, not
+            client-side timers) covering a normal response, a genuinely slow 4s response with a
+            live elapsed-time counter, a real server-side 500 failure with retry, and a shared
+            viewer for whatever the most recent response was.
           </p>
         </div>
         <div className="title-block-fields">
