@@ -3,42 +3,54 @@ import Specimen from '../../components/Specimen.jsx'
 import { useProgress } from '../../hooks/useProgress.js'
 
 const SPECIMEN_IDS = ['login', 'logout', 'session-timeout', 'remember-me', 'role-access']
-const VALID_USER = 'admin'
-const VALID_PASS = 'password123'
-const REMEMBER_KEY = 'au-remembered-username'
 const SESSION_SECONDS = 10
 
 export default function Authentication() {
   const { isDone, toggle, completedCount, total } = useProgress('authentication', SPECIMEN_IDS)
 
-  // --- Shared login/logout state ---
+  // --- Shared login/logout state (real serverless session via httpOnly cookie) ---
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [remember, setRemember] = useState(false)
   const [loggedIn, setLoggedIn] = useState(false)
   const [loginError, setLoginError] = useState(false)
+  const [checkingSession, setCheckingSession] = useState(true)
 
   useEffect(() => {
-    const saved = localStorage.getItem(REMEMBER_KEY)
-    if (saved) {
-      setUsername(saved)
-      setRemember(true)
-    }
+    fetch('/api/auth/session')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data) {
+          setLoggedIn(true)
+          setUsername(data.username)
+        }
+      })
+      .finally(() => setCheckingSession(false))
   }, [])
 
-  function handleLogin(e) {
+  async function handleLogin(e) {
     e.preventDefault()
-    if (username === VALID_USER && password === VALID_PASS) {
-      setLoggedIn(true)
-      setLoginError(false)
-      if (remember) localStorage.setItem(REMEMBER_KEY, username)
-      else localStorage.removeItem(REMEMBER_KEY)
-    } else {
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password, remember }),
+      })
+      if (res.ok) {
+        const data = await res.json()
+        setLoggedIn(true)
+        setUsername(data.username)
+        setLoginError(false)
+      } else {
+        setLoginError(true)
+      }
+    } catch {
       setLoginError(true)
     }
   }
 
-  function handleLogout() {
+  async function handleLogout() {
+    await fetch('/api/auth/logout', { method: 'POST' })
     setLoggedIn(false)
     setPassword('')
   }
@@ -78,9 +90,10 @@ export default function Authentication() {
         <div className="title-block-main">
           <h1>AU — Authentication</h1>
           <p>
-            Login/logout with fixed demo credentials (<code>admin</code> / <code>password123</code>
-            ), a self-contained session-timeout countdown, a "remember me" persisted via
-            localStorage, and role-gated content.
+            Real login/logout backed by a Vercel serverless function and a signed, httpOnly
+            session cookie (demo creds: <code>admin</code> / <code>password123</code>) — refresh
+            the page and you'll still be logged in. Plus a self-contained session-timeout
+            countdown and role-gated content.
           </p>
         </div>
         <div className="title-block-fields">
@@ -102,7 +115,9 @@ export default function Authentication() {
           ['error id', 'auth-login-error'],
         ]}
       >
-        {loggedIn ? (
+        {checkingSession ? (
+          <div style={{ color: 'var(--color-ink-soft)', fontSize: '0.85rem' }}>Checking session…</div>
+        ) : loggedIn ? (
           <div data-testid="auth-already-logged-in" className="result-line">
             ✓ Logged in as {username}
           </div>
@@ -194,29 +209,18 @@ export default function Authentication() {
 
       <Specimen
         id="remember-me"
-        title="Remember me — persisted across visits"
+        title="Remember me — controls real session length"
         done={isDone('remember-me')}
         onToggleDone={toggle}
         annotations={[
-          ['readout id', 'remembered-username-value'],
-          ['storage key', REMEMBER_KEY],
+          ['checkbox', 'auth-remember (on the Login specimen above)'],
+          ['unchecked', '30-minute session cookie'],
+          ['checked', '7-day session cookie'],
+          ['note', 'the cookie is httpOnly on purpose — it can\u2019t be read from JavaScript, so there\u2019s nothing to display here beyond "logged in or not"'],
         ]}
       >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'flex-start' }}>
-          <div id="remembered-username-value" data-testid="remembered-username-value" className="result-line" style={{ color: 'var(--color-ink)' }}>
-            Remembered username: {localStorage.getItem(REMEMBER_KEY) || '(none)'}
-          </div>
-          <button
-            id="clear-remembered-btn"
-            data-testid="clear-remembered-btn"
-            className="btn btn-outline"
-            onClick={() => {
-              localStorage.removeItem(REMEMBER_KEY)
-              setRemember(false)
-            }}
-          >
-            Clear remembered username
-          </button>
+        <div style={{ fontSize: '0.85rem', color: 'var(--color-ink-soft)' }}>
+          {checkingSession ? 'Checking session…' : loggedIn ? `✓ Session active for ${username}. Log out and back in with the box checked to get a 7-day session instead of 30 minutes.` : 'Not logged in yet — use the Login specimen above.'}
         </div>
       </Specimen>
 
