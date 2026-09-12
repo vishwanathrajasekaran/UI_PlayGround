@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Specimen from '../../components/Specimen.jsx'
 import { useProgress } from '../../hooks/useProgress.js'
 
@@ -25,43 +25,71 @@ export default function Ecommerce() {
     [search, category],
   )
 
-  // --- Cart ---
-  const [cart, setCart] = useState({}) // { productId: qty }
+  // --- Cart (persisted server-side via Postgres, identified by an httpOnly cookie) ---
+  const [cartItems, setCartItems] = useState([])
+  const [cartLoading, setCartLoading] = useState(true)
 
-  function addToCart(id) {
-    setCart((c) => ({ ...c, [id]: (c[id] || 0) + 1 }))
-  }
+  useEffect(() => {
+    fetch('/api/cart')
+      .then((res) => res.json())
+      .then((data) => setCartItems(data.items || []))
+      .finally(() => setCartLoading(false))
+  }, [])
 
-  function changeQty(id, delta) {
-    setCart((c) => {
-      const next = { ...c, [id]: (c[id] || 0) + delta }
-      if (next[id] <= 0) delete next[id]
-      return next
+  async function addToCart(id) {
+    const res = await fetch('/api/cart', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ productId: id, delta: 1 }),
     })
+    const data = await res.json()
+    setCartItems(data.items || [])
   }
 
-  function removeFromCart(id) {
-    setCart((c) => {
-      const next = { ...c }
-      delete next[id]
-      return next
+  async function changeQty(id, delta) {
+    const res = await fetch('/api/cart', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ productId: id, delta }),
     })
+    const data = await res.json()
+    setCartItems(data.items || [])
   }
 
-  const cartItems = Object.entries(cart).map(([id, qty]) => ({ ...PRODUCTS.find((p) => p.id === id), qty }))
+  async function removeFromCart(id) {
+    const res = await fetch('/api/cart', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ productId: id }),
+    })
+    const data = await res.json()
+    setCartItems(data.items || [])
+  }
+
   const cartTotal = cartItems.reduce((sum, item) => sum + item.price * item.qty, 0)
 
   // --- Checkout ---
   const [checkoutName, setCheckoutName] = useState('')
   const [checkoutAddress, setCheckoutAddress] = useState('')
   const [lastOrder, setLastOrder] = useState(null)
+  const [orderError, setOrderError] = useState('')
 
-  function placeOrder(e) {
+  async function placeOrder(e) {
     e.preventDefault()
     if (cartItems.length === 0) return
-    const orderId = `ORD-${Math.floor(100000 + Math.random() * 900000)}`
-    setLastOrder({ orderId, items: cartItems, total: cartTotal, name: checkoutName })
-    setCart({})
+    setOrderError('')
+    const res = await fetch('/api/orders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: checkoutName, address: checkoutAddress }),
+    })
+    const data = await res.json()
+    if (!res.ok) {
+      setOrderError(data.error || 'Something went wrong placing the order.')
+      return
+    }
+    setLastOrder(data)
+    setCartItems([])
     setCheckoutName('')
     setCheckoutAddress('')
   }
@@ -72,9 +100,9 @@ export default function Ecommerce() {
         <div className="title-block-main">
           <h1>EC — E-Commerce</h1>
           <p>
-            A full search → filter → cart → checkout → confirmation flow, wired together with
-            shared state across the specimens below — good for practicing a realistic multi-step
-            end-to-end test.
+            A full search → filter → cart → checkout → confirmation flow. The cart and orders are
+            genuinely persisted in Postgres, keyed to an anonymous httpOnly cookie — refresh the
+            page and your cart is still there.
           </p>
         </div>
         <div className="title-block-fields">
@@ -133,7 +161,8 @@ export default function Ecommerce() {
         ]}
       >
         <div id="ec-cart" data-testid="ec-cart">
-          {cartItems.length === 0 && <div data-testid="ec-cart-empty" style={{ color: 'var(--color-ink-soft)', fontSize: '0.85rem' }}>Cart is empty.</div>}
+          {cartLoading && <div style={{ color: 'var(--color-ink-soft)', fontSize: '0.85rem' }}>Loading cart…</div>}
+          {!cartLoading && cartItems.length === 0 && <div data-testid="ec-cart-empty" style={{ color: 'var(--color-ink-soft)', fontSize: '0.85rem' }}>Cart is empty.</div>}
           {cartItems.map((item) => (
             <div key={item.id} data-testid={`cart-item-${item.id}`} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderBottom: '1px solid var(--color-grid)' }}>
               <span style={{ flex: 1, fontSize: '0.86rem' }}>{item.name}</span>
@@ -176,6 +205,11 @@ export default function Ecommerce() {
             <button id="ec-place-order-btn" data-testid="ec-place-order-btn" className="btn" type="submit" disabled={cartItems.length === 0}>
               Place order (${cartTotal.toFixed(2)})
             </button>
+            {orderError && (
+              <div id="ec-order-error" data-testid="ec-order-error" style={{ color: 'var(--color-fail)', fontSize: '0.82rem' }}>
+                {orderError}
+              </div>
+            )}
           </div>
         </form>
       </Specimen>
