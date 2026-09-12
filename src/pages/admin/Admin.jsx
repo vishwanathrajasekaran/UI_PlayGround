@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Specimen from '../../components/Specimen.jsx'
 import { useProgress } from '../../hooks/useProgress.js'
 
@@ -7,26 +7,37 @@ const SPECIMEN_IDS = ['dashboard', 'users-crud', 'bulk-actions', 'settings']
 export default function Admin() {
   const { isDone, toggle, completedCount, total } = useProgress('admin', SPECIMEN_IDS)
 
-  // --- Users CRUD (shared by users-crud and bulk-actions) ---
-  const [users, setUsers] = useState([
-    { id: 1, name: 'Priya Nair', email: 'priya@example.com' },
-    { id: 2, name: 'Tom Becker', email: 'tom@example.com' },
-    { id: 3, name: 'Lucia Fernandez', email: 'lucia@example.com' },
-  ])
+  // --- Users CRUD (persisted in Postgres, shared by users-crud and bulk-actions) ---
+  const [users, setUsers] = useState([])
+  const [usersLoading, setUsersLoading] = useState(true)
   const [newName, setNewName] = useState('')
   const [newEmail, setNewEmail] = useState('')
   const [editingId, setEditingId] = useState(null)
   const [editName, setEditName] = useState('')
 
-  function addUser(e) {
+  useEffect(() => {
+    fetch('/api/admin/users')
+      .then((res) => res.json())
+      .then((data) => setUsers(data.users || []))
+      .finally(() => setUsersLoading(false))
+  }, [])
+
+  async function addUser(e) {
     e.preventDefault()
     if (!newName || !newEmail) return
-    setUsers((u) => [...u, { id: Date.now(), name: newName, email: newEmail }])
+    const res = await fetch('/api/admin/users', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: newName, email: newEmail }),
+    })
+    const data = await res.json()
+    if (res.ok) setUsers((u) => [...u, data.user])
     setNewName('')
     setNewEmail('')
   }
 
-  function deleteUser(id) {
+  async function deleteUser(id) {
+    await fetch(`/api/admin/users/${id}`, { method: 'DELETE' })
     setUsers((u) => u.filter((x) => x.id !== id))
     setSelected((s) => s.filter((x) => x !== id))
   }
@@ -36,8 +47,14 @@ export default function Admin() {
     setEditName(u.name)
   }
 
-  function saveEdit(id) {
-    setUsers((u) => u.map((x) => (x.id === id ? { ...x, name: editName } : x)))
+  async function saveEdit(id) {
+    const res = await fetch(`/api/admin/users/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: editName }),
+    })
+    const data = await res.json()
+    if (res.ok) setUsers((u) => u.map((x) => (x.id === id ? data.user : x)))
     setEditingId(null)
   }
 
@@ -53,7 +70,8 @@ export default function Admin() {
     setSelected(allSelected ? [] : users.map((u) => u.id))
   }
 
-  function deleteSelected() {
+  async function deleteSelected() {
+    await Promise.all(selected.map((id) => fetch(`/api/admin/users/${id}`, { method: 'DELETE' })))
     setUsers((u) => u.filter((x) => !selected.includes(x.id)))
     setSelected([])
   }
@@ -76,8 +94,9 @@ export default function Admin() {
         <div className="title-block-main">
           <h1>AD — Admin Portal</h1>
           <p>
-            A dashboard with stat cards, a users table with add/edit/delete, multi-row selection
-            with a bulk-delete action, and a settings toggle gated behind a confirmation step.
+            A dashboard with stat cards, a users table genuinely persisted in Postgres (add/edit/
+            delete), multi-row selection with a bulk-delete action, and a settings toggle gated
+            behind a confirmation step.
           </p>
         </div>
         <div className="title-block-fields">
@@ -130,6 +149,7 @@ export default function Admin() {
             Add user
           </button>
         </form>
+        {usersLoading && <div style={{ color: 'var(--color-ink-soft)', fontSize: '0.85rem', marginBottom: 10 }}>Loading users…</div>}
         <table data-testid="admin-users-table">
           <thead>
             <tr>
