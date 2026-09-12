@@ -13,34 +13,39 @@ async function getCartItems(cartId) {
 }
 
 export default async function handler(req, res) {
-  await ensureSchema()
-  const cartId = getOrCreateCartId(req, res)
+  try {
+    await ensureSchema()
+    const cartId = getOrCreateCartId(req, res)
 
-  if (req.method === 'GET') {
-    return res.status(200).json({ items: await getCartItems(cartId) })
-  }
-
-  if (req.method === 'POST') {
-    const { productId, delta } = req.body || {}
-    if (!productId || !PRODUCTS.find((p) => p.id === productId)) {
-      return res.status(400).json({ error: 'Invalid product' })
+    if (req.method === 'GET') {
+      return res.status(200).json({ items: await getCartItems(cartId) })
     }
-    const change = typeof delta === 'number' ? delta : 1
-    await sql`
-      INSERT INTO cart_items (cart_id, product_id, qty)
-      VALUES (${cartId}, ${productId}, GREATEST(${change}, 0))
-      ON CONFLICT (cart_id, product_id)
-      DO UPDATE SET qty = GREATEST(cart_items.qty + ${change}, 0)
-    `
-    await sql`DELETE FROM cart_items WHERE cart_id = ${cartId} AND qty <= 0`
-    return res.status(200).json({ items: await getCartItems(cartId) })
-  }
 
-  if (req.method === 'DELETE') {
-    const { productId } = req.body || {}
-    await sql`DELETE FROM cart_items WHERE cart_id = ${cartId} AND product_id = ${productId}`
-    return res.status(200).json({ items: await getCartItems(cartId) })
-  }
+    if (req.method === 'POST') {
+      const { productId, delta } = req.body || {}
+      if (!productId || !PRODUCTS.find((p) => p.id === productId)) {
+        return res.status(400).json({ error: 'Invalid product' })
+      }
+      const change = typeof delta === 'number' ? delta : 1
+      await sql`
+        INSERT INTO cart_items (cart_id, product_id, qty)
+        VALUES (${cartId}, ${productId}, GREATEST(${change}, 0))
+        ON CONFLICT (cart_id, product_id)
+        DO UPDATE SET qty = GREATEST(cart_items.qty + ${change}, 0)
+      `
+      await sql`DELETE FROM cart_items WHERE cart_id = ${cartId} AND qty <= 0`
+      return res.status(200).json({ items: await getCartItems(cartId) })
+    }
 
-  return res.status(405).json({ error: 'Method not allowed' })
+    if (req.method === 'DELETE') {
+      const { productId } = req.body || {}
+      await sql`DELETE FROM cart_items WHERE cart_id = ${cartId} AND product_id = ${productId}`
+      return res.status(200).json({ items: await getCartItems(cartId) })
+    }
+
+    return res.status(405).json({ error: 'Method not allowed' })
+  } catch (err) {
+    console.error('cart error:', err)
+    return res.status(500).json({ error: err.message })
+  }
 }
