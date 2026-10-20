@@ -95,6 +95,14 @@ export default function App() {
           </div>
 
           <div className="topbar-actions">
+            <a
+              className="topbar-link"
+              href="https://vishwanathrajasekaran.in/"
+              aria-label="Open About page"
+            >
+              <span>About</span>
+              <Icon name="arrow" size={15} />
+            </a>
             <Link className="topbar-link" to="/challenges" aria-label="Open practice path">
               <span>Practice path</span>
               <Icon name="arrow" size={15} />
@@ -134,8 +142,11 @@ export default function App() {
             <Route path="/wait-strategies" element={<WaitStrategies />} />
             <Route path="/challenges" element={<Challenges />} />
             <Route path="/special-challenges" element={<SpecialChallenges />} />
-          </Routes>
+            </Routes>
         </main>
+        <footer className="app-footer">
+          <span>© {new Date().getFullYear()} Vishwanath Rajasekaran | SDET | Automation Engineer</span>
+        </footer>
       </div>
     </div>
   )

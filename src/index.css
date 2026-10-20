@@ -638,6 +638,21 @@ button:disabled {
   padding: 40px 42px 88px;
 }
 
+.app-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 64px;
+  padding: 16px 42px;
+  border-top: 1px solid var(--color-grid);
+  color: var(--color-ink-soft);
+  background: color-mix(in srgb, var(--color-surface) 72%, transparent);
+  font-family: var(--font-mono);
+  font-size: 0.63rem;
+  letter-spacing: 0.02em;
+  text-align: center;
+}
+
 /* ---- Shared page title block ---- */
 .title-block {
   position: relative;
@@ -1632,6 +1647,11 @@ tbody tr:hover {
     padding-left: 28px;
   }
 
+  .app-footer {
+    padding-right: 28px;
+    padding-left: 28px;
+  }
+
   .home-hero {
     grid-template-columns: minmax(0, 1.1fr) minmax(230px, 0.9fr);
   }
@@ -1681,6 +1701,11 @@ tbody tr:hover {
     padding: 28px 20px 70px;
   }
 
+  .app-footer {
+    padding-right: 20px;
+    padding-left: 20px;
+  }
+
   .home-hero {
     grid-template-columns: 1fr;
     min-height: 0;
@@ -1728,6 +1753,13 @@ tbody tr:hover {
 
   .main {
     padding: 20px 14px 58px;
+  }
+
+  .app-footer {
+    min-height: 58px;
+    padding: 14px;
+    font-size: 0.57rem;
+    line-height: 1.5;
   }
 
   .home-hero {
